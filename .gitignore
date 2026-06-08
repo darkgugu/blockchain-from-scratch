@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.venv/
+env/
+
+# Node.js
+node_modules/
+.next/
+out/
+
+# Build artifacts
+*.zip
+
+# IDE
+.DS_Store
+.env.local
