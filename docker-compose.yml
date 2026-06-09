@@ -1,0 +1,88 @@
+services:
+  node1:
+    build: ./backend
+    ports:
+      - "5001:5001"
+    command: python node.py --port 5001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/chain"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - blockchain
+
+  node2:
+    build: ./backend
+    ports:
+      - "5002:5002"
+    command: python node.py --port 5002
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/chain"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - blockchain
+
+  node3:
+    build: ./backend
+    ports:
+      - "5003:5003"
+    command: python node.py --port 5003
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5003/chain"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    networks:
+      - blockchain
+
+  # Registers peers once all 3 nodes are healthy
+  init:
+    image: curlimages/curl:latest
+    depends_on:
+      node1:
+        condition: service_healthy
+      node2:
+        condition: service_healthy
+      node3:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - |
+        curl -sf -X POST http://node1:5001/nodes/register \
+          -H 'Content-Type: application/json' \
+          -d '{"nodes":["http://node2:5002","http://node3:5003"]}' &&
+        curl -sf -X POST http://node2:5002/nodes/register \
+          -H 'Content-Type: application/json' \
+          -d '{"nodes":["http://node1:5001","http://node3:5003"]}' &&
+        curl -sf -X POST http://node3:5003/nodes/register \
+          -H 'Content-Type: application/json' \
+          -d '{"nodes":["http://node1:5001","http://node2:5002"]}'
+    networks:
+      - blockchain
+    restart: "no"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - BLOCKCHAIN_NODE_5001_HOST=node1
+      - BLOCKCHAIN_NODE_5002_HOST=node2
+      - BLOCKCHAIN_NODE_5003_HOST=node3
+    depends_on:
+      - node1
+      - node2
+      - node3
+    networks:
+      - blockchain
+
+networks:
+  blockchain:
+    driver: bridge

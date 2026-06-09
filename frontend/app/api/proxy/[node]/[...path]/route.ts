@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const ALLOWED_PORTS = [5001, 5002, 5003]
 
+const NODE_HOSTS: Record<number, string> = {
+  5001: process.env.BLOCKCHAIN_NODE_5001_HOST ?? 'localhost',
+  5002: process.env.BLOCKCHAIN_NODE_5002_HOST ?? 'localhost',
+  5003: process.env.BLOCKCHAIN_NODE_5003_HOST ?? 'localhost',
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ node: string; path: string[] }> }
@@ -29,7 +35,8 @@ async function proxyRequest(
 
   const path = params.path.join('/')
   const search = request.nextUrl.search
-  const targetUrl = `http://localhost:${port}/${path}${search}`
+  const host = NODE_HOSTS[port]
+  const targetUrl = `http://${host}:${port}/${path}${search}`
 
   try {
     const body = method === 'POST' ? await request.text() : undefined

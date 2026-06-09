@@ -32,16 +32,19 @@ La difficulté est configurable via `--difficulty N` au lancement d'un nœud.
 
 ```
 projet/
+├── docker-compose.yml   # 5 services : node1, node2, node3, init, frontend
 ├── backend/
+│   ├── Dockerfile
 │   ├── blockchain.py    # Block, Transaction, Blockchain, MessdakToken, Wallet
 │   ├── node.py          # Application Flask + 9 routes REST
-│   ├── run_nodes.sh     # Lance 3 nœuds (ports 5001/5002/5003)
+│   ├── run_nodes.sh     # Lance 3 nœuds localement (hors Docker)
 │   ├── tamper.py        # Script de démonstration fraude
 │   └── requirements.txt
-├── frontend/            # Dashboard Next.js 15
+├── frontend/
+│   ├── Dockerfile
 │   ├── app/
 │   │   ├── page.tsx     # Dashboard principal
-│   │   └── api/proxy/   # Proxy CORS → Flask
+│   │   └── api/proxy/   # Proxy CORS → Flask (configurable via env vars)
 │   ├── components/      # ChainViz, MiningPanel, TxForm, NodeSelector, BlockDetail
 │   └── lib/             # api.ts, types.ts
 └── README.md
@@ -51,33 +54,45 @@ projet/
 
 ## Lancement
 
-### Prérequis
+### Avec Docker (recommandé)
 
-- Python 3.11+
-- Node.js 20+
-- npm
-
-### Backend
+**Prérequis :** Docker + Docker Compose
 
 ```bash
-cd backend
-pip install -r requirements.txt
-
-# Lancer les 3 nœuds (s'enregistrent automatiquement entre eux)
-bash run_nodes.sh
+docker compose up --build -d
 ```
 
-Les 3 nœuds démarrent sur :
+Le dashboard est accessible sur **http://localhost:3000**.
+
+Les 3 nœuds blockchain démarrent sur :
 - Nœud 1 : http://localhost:5001
 - Nœud 2 : http://localhost:5002
 - Nœud 3 : http://localhost:5003
 
-### Frontend
+> Un conteneur `init` attend que les 3 nœuds Flask soient prêts (healthcheck), puis enregistre automatiquement les pairs entre eux.
 
 ```bash
+# Suivre les logs
+docker compose logs -f
+
+# Arrêter
+docker compose down
+```
+
+### Sans Docker (développement local)
+
+**Prérequis :** Python 3.11+, Node.js 20+, pnpm
+
+```bash
+# Backend — 3 nœuds (dans un terminal)
+cd backend
+pip install -r requirements.txt
+bash run_nodes.sh
+
+# Frontend (dans un autre terminal)
 cd frontend
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 Ouvrir **http://localhost:3000** dans le navigateur.
@@ -193,6 +208,8 @@ Chaque mineur reçoit 100 MSK par bloc miné. Les soldes sont gérés par `Messd
 - **Ordre critique dans `mine_pending_transactions()`** : `process_transactions()` doit être appelé AVANT `add_block()`, car `add_block()` réinitialise `pending_transactions = []` après avoir miné. Un appel dans le mauvais ordre provoque des transactions perdues silencieusement.
 
 - **Gestion du CORS entre Next.js et Flask** : Le navigateur bloque les appels directs de `localhost:3000` vers `localhost:5001`. Résolu par un proxy route handler Next.js (`/api/proxy/[node]/[...path]`) qui relaie côté serveur, avec une whitelist `ALLOWED_PORTS` pour la sécurité.
+
+- **Réseau Docker inter-conteneurs** : Le proxy Next.js appelle `localhost:{port}` côté serveur. En Docker, les conteneurs ne partagent pas `localhost` — le frontend ne peut donc pas joindre `node1` via `localhost:5001`. Résolu en rendant le host configurable via les variables d'environnement `BLOCKCHAIN_NODE_5001_HOST`, `_5002_HOST`, `_5003_HOST` (valeur par défaut `localhost` pour le dev local). Le `docker-compose.yml` les positionne sur les noms de services Docker (`node1`, `node2`, `node3`).
 
 - **`@xyflow/react` v12 nécessite des exports nommés** : `import { ReactFlow, ... }` uniquement — il n'y a plus d'export default comme dans les versions précédentes. De plus, le conteneur doit avoir une hauteur fixe pour que le graphe s'affiche.
 
