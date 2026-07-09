@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { mine, tamperBlock, resolveConflicts } from '@/lib/api'
 import type { MineResponse, TamperResponse } from '@/lib/types'
+import { Button } from '@/components/ui/Button'
 
 interface MiningPanelProps {
   port: number
@@ -31,7 +32,7 @@ export default function MiningPanel({ port }: MiningPanelProps) {
       setMinedBlock(block)
       setNonce(block.nonce)
     } catch {
-      setMineError('Minage échoué — nœud injoignable?')
+      setMineError('Minage échoué — nœud injoignable ?')
     } finally {
       clearInterval(interval)
       setMining(false)
@@ -60,16 +61,12 @@ export default function MiningPanel({ port }: MiningPanelProps) {
 
   return (
     <div className="space-y-4">
-      {/* Mine button */}
-      <button
-        onClick={handleMine}
-        disabled={mining}
-        className="w-full py-3 rounded-lg font-semibold text-sm bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      >
-        {mining ? 'Mining…' : 'Mine Block'}
-      </button>
+      {/* Bouton de minage */}
+      <Button variant="primary" size="lg" onClick={handleMine} disabled={mining} className="w-full">
+        {mining ? 'Minage…' : 'Miner un bloc'}
+      </Button>
 
-      {/* Nonce animation / result */}
+      {/* Animation du nonce / résultat */}
       <AnimatePresence mode="wait">
         {mining && (
           <motion.div
@@ -77,15 +74,14 @@ export default function MiningPanel({ port }: MiningPanelProps) {
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="rounded-lg p-3 text-center border border-gray-700"
-            style={{ background: '#1c1007' }}
+            className="rounded-lg p-3 text-center border border-warning/30 bg-warning/10"
           >
-            <p className="text-gray-400 text-xs mb-1">Searching nonce…</p>
+            <p className="text-ink-secondary text-xs mb-1">Recherche du nonce…</p>
             <motion.p
               key={nonce}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="text-orange-400 font-mono text-xl font-bold"
+              className="text-warning font-mono text-xl font-bold"
             >
               {nonce.toLocaleString()}
             </motion.p>
@@ -97,48 +93,41 @@ export default function MiningPanel({ port }: MiningPanelProps) {
             key="result"
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-lg p-3 space-y-1 text-xs border border-gray-700"
-            style={{ background: '#1c1007' }}
+            className="rounded-lg p-3 space-y-1 text-xs border border-good/30 bg-good/10"
           >
-            <p className="text-orange-400 font-semibold">Block #{minedBlock.index} mined!</p>
-            <p className="text-gray-400">
-              Nonce: <span className="text-white font-mono">{minedBlock.nonce}</span>
+            <p className="text-good font-semibold">Bloc #{minedBlock.index} miné !</p>
+            <p className="text-ink-secondary">
+              Nonce : <span className="text-ink font-mono">{minedBlock.nonce}</span>
             </p>
-            <p className="text-gray-400">
-              Hash: <span className="text-orange-300 font-mono">{minedBlock.hash.slice(0, 20)}…</span>
+            <p className="text-ink-secondary">
+              Hash : <span className="text-primary font-mono" title={minedBlock.hash}>{minedBlock.hash.slice(0, 20)}…</span>
             </p>
-            <p className="text-gray-400">
-              Transactions: <span className="text-white">{minedBlock.transactions.length}</span>
+            <p className="text-ink-secondary">
+              Transactions : <span className="text-ink">{minedBlock.transactions.length}</span>
             </p>
           </motion.div>
         )}
       </AnimatePresence>
 
       {mineError && (
-        <p className="text-red-300 text-xs bg-red-950/50 border border-red-900/50 rounded p-2">{mineError}</p>
+        <p className="text-critical text-xs bg-critical/10 border border-critical/30 rounded p-2">{mineError}</p>
       )}
 
-      {/* Debug actions */}
+      {/* Actions de débogage */}
       <div className="grid grid-cols-2 gap-2">
-        <button
-          onClick={handleTamper}
-          className="py-2 rounded-lg text-xs font-medium bg-gray-800 hover:bg-gray-700 border border-gray-600 text-red-400 hover:text-red-300 transition-colors"
-        >
-          Tamper Block
-        </button>
-        <button
-          onClick={handleResolve}
-          className="py-2 rounded-lg text-xs font-medium bg-gray-800 hover:bg-gray-700 border border-gray-600 text-gray-300 hover:text-white transition-colors"
-        >
-          Resolve Conflicts
-        </button>
+        <Button variant="danger" size="sm" onClick={handleTamper} className="w-full">
+          Falsifier le bloc
+        </Button>
+        <Button variant="ghost" size="sm" onClick={handleResolve} className="w-full">
+          Résoudre les conflits
+        </Button>
       </div>
 
       {tamperMsg && (
-        <p className="text-red-300 text-xs bg-red-950/50 border border-red-900/50 rounded p-2">{tamperMsg}</p>
+        <p className="text-critical text-xs bg-critical/10 border border-critical/30 rounded p-2">{tamperMsg}</p>
       )}
       {resolveMsg && (
-        <p className="text-gray-300 text-xs bg-gray-800 border border-gray-700 rounded p-2">{resolveMsg}</p>
+        <p className="text-ink-secondary text-xs bg-white/5 border border-border rounded p-2">{resolveMsg}</p>
       )}
     </div>
   )

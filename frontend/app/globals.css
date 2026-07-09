@@ -1,26 +1,56 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #0a0e17;
+  --bg-elevated: #0d1424;
+  --surface: #10182a;
+  --primary: #2f6fee;
+  --primary-hover: #4c86ff;
+  --good: #0ca30c;
+  --warning: #fab219;
+  --critical: #d03b3b;
+  --gold: #d4a537;
+  --ink: #ffffff;
+  --ink-secondary: #8b93a7;
+  --ink-muted: #5b6478;
+  --border: rgba(255, 255, 255, 0.08);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-surface: var(--surface);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-good: var(--good);
+  --color-warning: var(--warning);
+  --color-critical: var(--critical);
+  --color-gold: var(--gold);
+  --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+  --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* React Flow: masquer les handles (non utilisés, nœuds non connectables) et ajouter un hover discret */
+.react-flow__handle {
+  opacity: 0;
+  pointer-events: none;
 }
+
+.react-flow__node {
+  transition: transform 0.15s ease;
+}
+
+.react-flow__node:hover {
+  transform: scale(1.04);
+}
+

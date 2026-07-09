@@ -39,14 +39,14 @@ export default function ChainViz({ port }: ChainVizProps) {
         position: { x: i * 220, y: 80 },
         data: {
           label: (
-            <div className="text-center text-xs">
+            <div className="text-center text-xs" title={block.hash}>
               <div className="font-bold text-sm">
                 {block.index === 0 ? 'Genesis' : `#${block.index}`}
               </div>
-              <div className="font-mono mt-1" style={{ color: '#fca5a5' }}>
+              <div className="font-mono mt-1" style={{ color: 'var(--ink-secondary)' }}>
                 {block.hash.slice(0, 10)}…
               </div>
-              <div className="mt-1" style={{ color: '#a8a29e' }}>
+              <div className="mt-1" style={{ color: 'var(--ink-muted)' }}>
                 {block.transactions.length} tx
               </div>
             </div>
@@ -54,13 +54,13 @@ export default function ChainViz({ port }: ChainVizProps) {
         },
         style: {
           background: block.index === 0
-            ? '#431407'
+            ? 'rgba(212, 165, 55, 0.12)'
             : data.valid
-              ? '#1c1007'
-              : '#450a0a',
-          border: `2px solid ${block.index === 0 ? '#ea580c' : data.valid ? '#f97316' : '#ef4444'}`,
+              ? 'var(--surface)'
+              : 'rgba(208, 59, 59, 0.12)',
+          border: `2px solid ${block.index === 0 ? 'var(--gold)' : data.valid ? 'var(--primary)' : 'var(--critical)'}`,
           borderRadius: '12px',
-          color: 'white',
+          color: 'var(--ink)',
           width: 160,
           cursor: 'pointer',
         },
@@ -70,14 +70,14 @@ export default function ChainViz({ port }: ChainVizProps) {
         id: `e${block.index - 1}-${block.index}`,
         source: String(block.index - 1),
         target: String(block.index),
-        style: { stroke: data.valid ? '#f97316' : '#ef4444' },
+        style: { stroke: data.valid ? 'var(--primary)' : 'var(--critical)' },
         animated: !data.valid,
       }))
 
       setNodes(newNodes)
       setEdges(newEdges)
     } catch {
-      setError(`Node ${port} unreachable`)
+      setError(`Nœud ${port} inaccessible`)
     }
   }, [port, setNodes, setEdges])
 
@@ -97,7 +97,7 @@ export default function ChainViz({ port }: ChainVizProps) {
 
   if (error) {
     return (
-      <div className="h-64 flex items-center justify-center text-red-400 text-sm">
+      <div className="h-64 flex items-center justify-center text-critical text-sm">
         {error}
       </div>
     )
@@ -106,12 +106,12 @@ export default function ChainViz({ port }: ChainVizProps) {
   return (
     <>
       <div className="mb-2 flex items-center gap-2">
-        <span className="text-gray-500 text-xs">{chain.length} bloc{chain.length > 1 ? 's' : ''}</span>
-        <span className="text-gray-700 text-xs">·</span>
-        <span className="text-gray-500 text-xs">Cliquez sur un bloc pour les détails</span>
+        <span className="text-ink-muted text-xs">{chain.length} bloc{chain.length > 1 ? 's' : ''}</span>
+        <span className="text-ink-muted text-xs">·</span>
+        <span className="text-ink-muted text-xs">Cliquez sur un bloc pour les détails</span>
       </div>
 
-      <div className="h-64 rounded-lg border border-gray-700" style={{ background: '#0c0804' }}>
+      <div className="h-64 rounded-lg border border-border" style={{ background: 'var(--surface)' }}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -122,8 +122,9 @@ export default function ChainViz({ port }: ChainVizProps) {
           fitViewOptions={{ padding: 0.2 }}
           nodesDraggable={false}
           nodesConnectable={false}
+          proOptions={{ hideAttribution: true }}
         >
-          <Background color="#292524" gap={16} />
+          <Background color="#1b2334" gap={16} />
         </ReactFlow>
       </div>
 
