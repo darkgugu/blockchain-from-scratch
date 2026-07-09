@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { postTransaction } from '@/lib/api'
+import { Button } from '@/components/ui/Button'
 
 interface TxFormProps {
   port: number
@@ -36,20 +37,20 @@ export default function TxForm({ port }: TxFormProps) {
       setReceiver('')
       setAmount('')
     } catch {
-      setMessage('Transaction failed — is the node running?')
+      setMessage('Transaction échouée — le nœud est-il lancé ?')
       setStatus('error')
     } finally {
       timeoutRef.current = setTimeout(() => setStatus('idle'), 3000)
     }
   }
 
-  const inputClass = "w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/40 transition-colors"
+  const inputClass = "w-full bg-white/5 border border-border rounded-lg px-3 py-2 text-ink text-sm placeholder-ink-muted focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 transition-colors"
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <label className="block text-xs text-gray-400 mb-1 font-medium">Sender</label>
+          <label className="block text-xs text-ink-secondary mb-1 font-medium">Expéditeur</label>
           <input
             type="text"
             value={sender}
@@ -59,7 +60,7 @@ export default function TxForm({ port }: TxFormProps) {
           />
         </div>
         <div>
-          <label className="block text-xs text-gray-400 mb-1 font-medium">Receiver</label>
+          <label className="block text-xs text-ink-secondary mb-1 font-medium">Destinataire</label>
           <input
             type="text"
             value={receiver}
@@ -70,7 +71,7 @@ export default function TxForm({ port }: TxFormProps) {
         </div>
       </div>
       <div>
-        <label className="block text-xs text-gray-400 mb-1 font-medium">Amount (MSK)</label>
+        <label className="block text-xs text-ink-secondary mb-1 font-medium">Montant (MSK)</label>
         <input
           type="number"
           value={amount}
@@ -81,19 +82,15 @@ export default function TxForm({ port }: TxFormProps) {
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={status === 'loading'}
-        className="w-full py-2.5 rounded-lg text-sm font-semibold bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-      >
-        {status === 'loading' ? 'Sending…' : 'Add Transaction'}
-      </button>
+      <Button type="submit" variant="primary" size="lg" disabled={status === 'loading'} className="w-full">
+        {status === 'loading' ? 'Envoi…' : 'Ajouter la transaction'}
+      </Button>
 
       {status === 'success' && (
-        <p className="text-green-400 text-xs bg-green-950/50 border border-green-900/50 rounded p-2">{message}</p>
+        <p className="text-good text-xs bg-good/10 border border-good/30 rounded p-2">{message}</p>
       )}
       {status === 'error' && (
-        <p className="text-red-400 text-xs bg-red-950/50 border border-red-900/50 rounded p-2">{message}</p>
+        <p className="text-critical text-xs bg-critical/10 border border-critical/30 rounded p-2">{message}</p>
       )}
     </form>
   )
